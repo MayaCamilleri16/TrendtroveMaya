@@ -4,37 +4,47 @@ include('db_connection.php');
 // users
 function createUser($name, $email, $password, $profile_picture, $bio) {
     global $conn;
-    
+
+    // Provide a default value for profile_picture and bio
+    if (empty($profile_picture)) {
+        $profile_picture = ''; // or any default value you prefer
+    }
+    if (empty($bio)) {
+        $bio = ''; // or any default value you prefer
+    }
+
     //for inserting a new user
     $stmt = $conn->prepare("INSERT INTO users (name, email, password, profile_picture, bio) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("sssss", $name, $email, $password, $profile_picture, $bio);
-    
+
     if ($stmt->execute()) {
         return true;
     } else {
+        // Error handling
+        echo "Error: " . $conn->error;
         return false;
     }
 }
 
 function readUser($user_id) {
     global $conn;
-    
+
     //  statement for selecting a user
     $stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     return $result->fetch_assoc();
 }
 
 function updateUser($user_id, $name, $email, $password, $profile_picture, $bio) {
     global $conn;
-    
+
     //  statement for updating a user
     $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, password = ?, profile_picture = ?, bio = ? WHERE user_id = ?");
     $stmt->bind_param("sssssi", $name, $email, $password, $profile_picture, $bio, $user_id);
-    
+
     if ($stmt->execute()) {
         return true;
     } else {
@@ -44,17 +54,18 @@ function updateUser($user_id, $name, $email, $password, $profile_picture, $bio) 
 
 function deleteUser($user_id) {
     global $conn;
-    
+
     // Prepared statement for deleting a user
     $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
-    
+
     if ($stmt->execute()) {
         return true;
     } else {
         return false;
     }
 }
+
 
 //  pins
 function createPin($user_id, $image_url, $description, $tags) {
