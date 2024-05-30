@@ -44,11 +44,21 @@
             </ul>
         </div>
         <div class="header-icons">
-            <img src="assets/search.png" alt="Search" class="icon">
-            <img src="assets/notification.png" alt="Notifications" class="icon">
-            <img src="assets/messages.png" alt="Messages" class="icon">
-            <img src="assets/account.png" alt="Account" class="icon">
-        </div>
+    <a href="search.html" class="nav-link">
+        <img src="assets/search.png" alt="Search" class="icon">
+    </a>
+    <a href="notifications.html" class="nav-link">
+        <img src="assets/notification.png" alt="Notifications" class="icon">
+    </a>
+    <a href="messages.html" class="nav-link">
+        <img src="assets/messages.png" alt="Messages" class="icon">
+    </a>
+    <a href="login.php" class="nav-link">
+        <img src="assets/account.png" alt="Account" class="icon">
+    </a>
+</div>
+
+
     </nav>
 
 
@@ -85,10 +95,9 @@
         ?>
     </div>
 </main>
-      
 
-     <!-- Footer -->
-     <footer class="text-center mt-4">
+<!-- Footer -->
+<footer class="text-center mt-4">
         <p>&copy; 2024 Trendtrove</p>
     </footer>
 
