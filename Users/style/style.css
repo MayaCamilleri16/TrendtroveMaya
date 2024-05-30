@@ -261,3 +261,34 @@ body {
 .profile-content.active {
     display: block;
 }
+
+/* notification Styles */
+
+.notification-panel {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    right: 0; /* Align to the right side */
+    top: 60px; /* Adjust based on your navbar height */
+    width: 300px; /* Adjust as needed */
+    background-color: white; /* Background color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for the panel */
+    z-index: 1000; /* Ensure it is on top */
+    border-left: 1px solid #ddd; /* Border for better separation */
+    padding: 15px; /* Padding inside the panel */
+    overflow-y: auto; /* Scrollable if content exceeds height */
+}
+
+.notification-content ul {
+    list-style-type: none; /* Remove default bullet points */
+    padding: 0; /* Remove default padding */
+}
+
+.notification-content ul li {
+    border-bottom: 1px solid #ddd; /* Separator between notifications */
+    padding: 10px 0; /* Space between notifications */
+}
+
+.notification-content ul li small {
+    display: block; /* Separate line for timestamp */
+    color: #888; /* Gray color for timestamp */
+}

@@ -16,62 +16,77 @@ session_start();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
 </head>
 <body>
-    <!-- Header using Bootstrap Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <a class="navbar-brand" href="#">
-            <div class="logo-container rounded-circle overflow-hidden">
-                <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
-            </div>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="#">
+        <div class="logo-container rounded-circle overflow-hidden">
+            <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
+        </div>
+    </a>
+    <div class="ml-auto">
+        <h1 class="title">Home Feed</h1>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Create</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Season Collection
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#">Winter</a>
+                    <a class="dropdown-item" href="#">Autumn</a>
+                    <a class="dropdown-item" href="#">Spring</a>
+                    <a class="dropdown-item" href="#">Summer</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="header-icons">
+        <a href="search.html" class="nav-link">
+            <img src="assets/search.png" alt="Search" class="icon">
         </a>
-        <div class="ml-auto">
-            <h1 class="title">Home Feed</h1>
+        <a href="#" class="nav-link" id="notificationIcon">
+            <img src="assets/notification.png" alt="Notifications" class="icon">
+        </a>
+        <div id="notificationPanel" class="notification-panel">
+            <h2>Notifications</h2>
+            <div class="notification-content">
+                <?php if (!empty($notifications)): ?>
+                    <ul>
+                        <?php foreach ($notifications as $notification): ?>
+                            <li>
+                                <?php echo htmlspecialchars($notification['content']); ?>
+                                <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No notifications.</p>
+                <?php endif; ?>
+            </div>
         </div>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Create</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Season Collection
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Winter</a>
-                        <a class="dropdown-item" href="#">Autumn</a>
-                        <a class="dropdown-item" href="#">Spring</a>
-                        <a class="dropdown-item" href="#">Summer</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <div class="header-icons">
-            <a href="search.html" class="nav-link">
-                <img src="assets/search.png" alt="Search" class="icon">
+        <a href="messages.html" class="nav-link">
+            <img src="assets/messages.png" alt="Messages" class="icon">
+        </a>
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <a href="account.php" class="nav-link">
+                <img src="assets/account.png" alt="Account" class="icon">
             </a>
-            <a href="notifications.html" class="nav-link">
-                <img src="assets/notification.png" alt="Notifications" class="icon">
+            <a href="logout.php" class="nav-link">
+                Logout
             </a>
-            <a href="messages.html" class="nav-link">
-                <img src="assets/messages.png" alt="Messages" class="icon">
+        <?php else: ?>
+            <a href="login.php" class="nav-link">
+                <img src="assets/account.png" alt="Account" class="icon">
             </a>
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="account.php" class="nav-link">
-                    <img src="assets/account.png" alt="Account" class="icon">
-                </a>
-                <a href="logout.php" class="nav-link">
-                    Logout
-                </a>
-            <?php else: ?>
-                <a href="login.php" class="nav-link">
-                    <img src="assets/account.png" alt="Account" class="icon">
-                </a>
-            <?php endif; ?>
-        </div>
-    </nav>
-
+        <?php endif; ?>
+    </div>
+</nav>
     <!-- Main area -->
     <main id="content">
         <!-- for you -->
@@ -109,9 +124,39 @@ session_start();
     <footer class="text-center mt-4">
         <p>&copy; 2024 Trendtrove</p>
     </footer>
+    <script>
+        function openTab(tabName) {
+            var i;
+            var x = document.getElementsByClassName("profile-content");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            document.getElementById(tabName).style.display = "block";
+        }
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationPanel = document.getElementById('notificationPanel');
+
+            notificationIcon.addEventListener('click', function (event) {
+                event.preventDefault(); // Prevent the default anchor click behavior
+                if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
+                    notificationPanel.style.display = 'block';
+                } else {
+                    notificationPanel.style.display = 'none';
+                }
+            });
+
+            // Close the notification panel if clicked outside
+            document.addEventListener('click', function (event) {
+                if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
+                    notificationPanel.style.display = 'none';
+                }
+            });
+
+            // Initialize the default tab
+            openTab('created');
+        });
+    </script>
 </body>
 </html>
