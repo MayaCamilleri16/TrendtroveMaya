@@ -99,17 +99,33 @@ $notifications = readNotifications($user_id);
             display: block;
             color: #888;
         }
+        .notification-panel, .message-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message-panel h2 {
+            margin-top: 0;
+        }
     </style>
 </head>
+<body>
 <!-- Header using Bootstrap Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="index.php">
         <div class="logo-container rounded-circle overflow-hidden">
             <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
         </div>
     </a>
     <div class="ml-auto">
-        <h1 class="title">Home Feed</h1>
+        <a href="index.php" class="title">Home Feed</a>
     </div>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -137,28 +153,40 @@ $notifications = readNotifications($user_id);
             <img src="assets/search.png" alt="Search" class="icon">
         </a>
         <a href="#" class="nav-link" id="notificationIcon">
-        <img src="assets/notification.png" alt="Notifications" class="icon">
-    </a>
-    <div id="notificationPanel" class="notification-panel">
-        <h2>Notifications</h2>
-        <div class="notification-content">
-            <?php if (!empty($notifications)): ?>
-                <ul>
-                    <?php foreach ($notifications as $notification): ?>
-                        <li>
-                            <?php echo htmlspecialchars($notification['content']); ?>
-                            <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p>No notifications.</p>
-            <?php endif; ?>
+            <img src="assets/notification.png" alt="Notifications" class="icon">
+        </a>
+        <div id="notificationPanel" class="notification-panel">
+            <h2>Notifications</h2>
+            <div class="notification-content">
+                <?php if (!empty($notifications)): ?>
+                    <ul>
+                        <?php foreach ($notifications as $notification): ?>
+                            <li>
+                                <?php echo htmlspecialchars($notification['content']); ?>
+                                <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No notifications.</p>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
-        <a href="messages.html" class="nav-link">
+        <a href="#" class="nav-link" id="messageIcon">
             <img src="assets/messages.png" alt="Messages" class="icon">
         </a>
+        <div id="messagePanel" class="message-panel">
+            <h2>Inbox</h2>
+            <div class="message-content">
+                <input type="text" placeholder="Search by name or email">
+                <button id="newMessageBtn">New Message</button>
+                <form id="newMessageForm" action="send_message.php" method="post" style="display:none;">
+                    <input type="text" name="receiver_id" placeholder="Receiver ID" required>
+                    <textarea name="content" placeholder="Your message" required></textarea>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
         <?php if (isset($_SESSION['user_id'])): ?>
             <a href="account.php" class="nav-link">
                 <img src="assets/account.png" alt="Account" class="icon">
@@ -173,7 +201,6 @@ $notifications = readNotifications($user_id);
         <?php endif; ?>
     </div>
 </nav>
-<body>
     <div class="profile-container">
         <div class="cover-photo">
             <img src="<?php echo htmlspecialchars($user['cover_photo']); ?>" alt="Cover Photo" id="cover-photo">
@@ -279,8 +306,55 @@ $notifications = readNotifications($user_id);
             }
             document.getElementById(tabName).style.display = "block";
         }
-    </script>
 
-    
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const messageIcon = document.getElementById('messageIcon');
+            const messagePanel = document.getElementById('messagePanel');
+            const newMessageBtn = document.getElementById('newMessageBtn');
+            const newMessageForm = document.getElementById('newMessageForm');
+
+            notificationIcon.addEventListener('click', function (event) {
+                event.preventDefault(); // Prevent the default anchor click behavior
+                if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
+                    notificationPanel.style.display = 'block';
+                } else {
+                    notificationPanel.style.display = 'none';
+                }
+            });
+
+            messageIcon.addEventListener('click', function (event) {
+                event.preventDefault(); // Prevent the default anchor click behavior
+                if (messagePanel.style.display === 'none' || messagePanel.style.display === '') {
+                    messagePanel.style.display = 'block';
+                } else {
+                    messagePanel.style.display = 'none';
+                }
+            });
+
+            newMessageBtn.addEventListener('click', function () {
+                if (newMessageForm.style.display === 'none' || newMessageForm.style.display === '') {
+                    newMessageForm.style.display = 'block';
+                } else {
+                    newMessageForm.style.display = 'none';
+                }
+            });
+
+            // Close the notification and message panels if clicked outside
+            document.addEventListener('click', function (event) {
+                if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
+                    notificationPanel.style.display = 'none';
+                }
+                if (!messageIcon.contains(event.target) && !messagePanel.contains(event.target)) {
+                    messagePanel.style.display = 'none';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            openTab('created');
+        });
+    </script>
 </body>
 </html>

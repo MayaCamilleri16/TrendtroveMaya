@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('db_connection.php');
-include('db_functions.php'); // Ensure this is included to access createComment
+include('db_functions.php'); 
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
