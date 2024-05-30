@@ -39,7 +39,7 @@ $stmt->execute();
 $following_count = $stmt->get_result()->fetch_assoc()['count'];
 
 // Fetch user's pins
-$pins_stmt = $conn->prepare("SELECT * FROM pin WHERE user_id = ?");
+$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE user_id = ?");
 $pins_stmt->bind_param("i", $user_id);
 $pins_stmt->execute();
 $pins_result = $pins_stmt->get_result();
@@ -83,31 +83,6 @@ $notifications = readNotifications($user_id);
         }
         .card p {
             padding: 10px;
-        }
-        .notification-panel {
-            display: none;
-            position: fixed;
-            right: 0;
-            top: 60px;
-            width: 300px;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            border-left: 1px solid #ddd;
-            padding: 15px;
-            overflow-y: auto;
-        }
-        .notification-content ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .notification-content ul li {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-        .notification-content ul li small {
-            display: block;
-            color: #888;
         }
         .notifications-container {
             margin-top: 20px;
@@ -162,25 +137,25 @@ $notifications = readNotifications($user_id);
             <img src="assets/search.png" alt="Search" class="icon">
         </a>
         <a href="#" class="nav-link" id="notificationIcon">
-            <img src="assets/notification.png" alt="Notifications" class="icon">
-        </a>
-        <div id="notificationPanel" class="notification-panel">
-            <h2>Notifications</h2>
-            <div class="notification-content">
-                <?php if (!empty($notifications)): ?>
-                    <ul>
-                        <?php foreach ($notifications as $notification): ?>
-                            <li>
-                                <?php echo htmlspecialchars($notification['content']); ?>
-                                <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>No notifications.</p>
-                <?php endif; ?>
-            </div>
+        <img src="assets/notification.png" alt="Notifications" class="icon">
+    </a>
+    <div id="notificationPanel" class="notification-panel">
+        <h2>Notifications</h2>
+        <div class="notification-content">
+            <?php if (!empty($notifications)): ?>
+                <ul>
+                    <?php foreach ($notifications as $notification): ?>
+                        <li>
+                            <?php echo htmlspecialchars($notification['content']); ?>
+                            <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p>No notifications.</p>
+            <?php endif; ?>
         </div>
+    </div>
         <a href="messages.html" class="nav-link">
             <img src="assets/messages.png" alt="Messages" class="icon">
         </a>
@@ -304,30 +279,8 @@ $notifications = readNotifications($user_id);
             }
             document.getElementById(tabName).style.display = "block";
         }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const notificationIcon = document.getElementById('notificationIcon');
-            const notificationPanel = document.getElementById('notificationPanel');
-
-            notificationIcon.addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default anchor click behavior
-                if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
-                    notificationPanel.style.display = 'block';
-                } else {
-                    notificationPanel.style.display = 'none';
-                }
-            });
-
-            // Close the notification panel if clicked outside
-            document.addEventListener('click', function (event) {
-                if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
-                    notificationPanel.style.display = 'none';
-                }
-            });
-
-            // Initialize the default tab
-            openTab('created');
-        });
     </script>
+
+    
 </body>
 </html>

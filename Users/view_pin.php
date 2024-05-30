@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Fetch pin details from the database
 $pin_id = $_GET['pin_id'];
-$pin_stmt = $conn->prepare("SELECT * FROM pin WHERE pin_id = ?");
+$pin_stmt = $conn->prepare("SELECT * FROM pins WHERE pin_id = ?");
 $pin_stmt->bind_param("i", $pin_id);
 $pin_stmt->execute();
 $pin_result = $pin_stmt->get_result();
@@ -146,7 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </form>
         </div>
     </div>
-    <script>
+      <script>
         function openTab(tabName) {
             var i;
             var x = document.getElementsByClassName("profile-content");

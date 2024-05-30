@@ -17,7 +17,7 @@ session_start();
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand" href="#">
+<a class="navbar-brand" href="index.php">
         <div class="logo-container rounded-circle overflow-hidden">
             <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
         </div>
