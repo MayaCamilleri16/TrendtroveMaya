@@ -67,20 +67,22 @@ function deleteUser($user_id) {
 }
 
 
-//  pins
-function createPin($user_id, $image_url, $description, $tags) {
+// pins
+function createPin($user_id, $image_url, $description, $tags, $season_id) {
     global $conn;
 
     // statement for inserting a new pin
-    $stmt = $conn->prepare("INSERT INTO pins (user_id, image_url, description, tags) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", user_id, image_url, description, tags);
+    $stmt = $conn->prepare("INSERT INTO pins (user_id, image_url, description, tags, season_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssi", $user_id, $image_url, $description, $tags, $season_id);
     
     if ($stmt->execute()) {
         return true;
     } else {
+        echo "Error: " . $stmt->error; // for debugging purposes
         return false;
     }
 }
+
 function readPin($pin_id) {
     global $conn;
 
@@ -93,17 +95,17 @@ function readPin($pin_id) {
     return $result->fetch_assoc(); 
 }
 
-
-function updatePin($pin_id, $user_id, $image_url, $description, $tags) {
+function updatePin($pin_id, $user_id, $image_url, $description, $tags, $season_id) {
     global $conn;
 
     // statement for updating a pin
-    $stmt = $conn->prepare("UPDATE pins SET user_id = ?, image_url = ?, description = ?, tags = ? WHERE pin_id = ?");
-    $stmt->bind_param("isssi", user_id, image_url, description, tags, pin_id);
+    $stmt = $conn->prepare("UPDATE pins SET user_id = ?, image_url = ?, description = ?, tags = ?, season_id = ? WHERE pin_id = ?");
+    $stmt->bind_param("isssii", $user_id, $image_url, $description, $tags, $season_id, $pin_id);
     
     if ($stmt->execute()) {
         return true;
     } else {
+        echo "Error: " . $stmt->error; // for debugging purposes
         return false;
     }
 }
@@ -111,14 +113,14 @@ function updatePin($pin_id, $user_id, $image_url, $description, $tags) {
 function deletePin($pin_id) {
     global $conn;
 
-    //  statement for deleting a pin
+    // statement for deleting a pin
     $stmt = $conn->prepare("DELETE FROM pins WHERE pin_id = ?");
-
-    $stmt->bind_param("i", pin_id);
+    $stmt->bind_param("i", $pin_id);
     
     if ($stmt->execute()) {
         return true;
     } else {
+        echo "Error: " . $stmt->error; // for debugging purposes
         return false;
     }
 }
@@ -131,7 +133,7 @@ function createComment($user_id, $pin_id, $content) {
     
     //  statement for inserting a new comment
     $stmt = $conn->prepare("INSERT INTO comments (user_id, pin_id, content) VALUES (?, ?, ?)");
-    $stmt->bind_param("iis", $user_id, pin_id, content);
+    $stmt->bind_param("iis", $user_id, $pin_id, $content);
     
     if ($stmt->execute()) {
         return true;
@@ -145,19 +147,19 @@ function readComment($comment_id) {
     
     //  statement for selecting a comment
     $stmt = $conn->prepare("SELECT * FROM comments WHERE comment_id = ?");
-    $stmt->bind_param("i", comment_id);
+    $stmt->bind_param("i", $comment_id);
     $stmt->execute();
     $result = $stmt->get_result();
     
     return $result->fetch_assoc();
 }
 
-function updateComment($comment_id,$content) {
+function updateComment($comment_id, $content) {
     global $conn;
     
     //  statement for updating a comment
     $stmt = $conn->prepare("UPDATE comments SET content = ? WHERE comment_id = ?");
-    $stmt->bind_param("si", content, comment_id);
+    $stmt->bind_param("si", $content, $comment_id);
     
     if ($stmt->execute()) {
         return true;
@@ -171,7 +173,7 @@ function deleteComment($comment_id) {
     
     // statement for deleting a comment
     $stmt = $conn->prepare("DELETE FROM comments WHERE comment_id = ?");
-    $stmt->bind_param("i", comment_id);
+    $stmt->bind_param("i", $comment_id);
     
     if ($stmt->execute()) {
         return true;
@@ -180,63 +182,8 @@ function deleteComment($comment_id) {
     }
 }
 
-//  user preference
-function createUserPreference($user_id, $preference, $value) {
-    global $conn;
-    
-    // statement for inserting a new user preference
-    $stmt = $conn->prepare("INSERT INTO user_preferences (user_id, preference, value) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $user_id, $preference, $value);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
-// Read a user preference
-function readUserPreference($preference_id) {
-    global $conn;
-    
-    //statement for selecting a user preference
-    $stmt = $conn->prepare("SELECT * FROM user_preferences WHERE preference_id = ?");
-    $stmt->bind_param("i", $preference_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    return $result->fetch_assoc();
-}
 
-// Update a user preference
-function updateUserPreference($preference_id, $preference, $value) {
-    global $conn;
-    
-    // statement for updating a user preference
-    $stmt = $conn->prepare("UPDATE user_preferences SET preference = ?, value = ? WHERE preference_id = ?");
-    $stmt->bind_param("ssi", $preference, $value, $preference_id);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Delete a user preference
-function deleteUserPreference($preference_id) {
-    global $conn;
-    
-    // Prepared statement for deleting a user preference
-    $stmt = $conn->prepare("DELETE FROM user_preferences WHERE preference_id = ?");
-    $stmt->bind_param("i", $preference_id);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
 //season collection
 function createSeasonCollection($season, $description) {
     global $conn;
@@ -287,63 +234,6 @@ function deleteSeasonCollection($collection_id) {
     // statement for deleting a season collection
     $stmt = $conn->prepare("DELETE FROM season_collection WHERE collection_id = ?");
     $stmt->bind_param("i", $collection_id);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-// Create a new search history entry
-function createSearchHistory($user_id, $search_query, $timestamp) {
-    global $conn;
-    
-    // statement for inserting a new search history entry
-    $stmt = $conn->prepare("INSERT INTO search_history (user_id, search_query, timestamp) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $user_id, $search_query, $timestamp);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Read search history entries by user_id
-function readSearchHistory($user_id) {
-    global $conn;
-    
-    // statement for selecting search history entries for a specific user
-    $stmt = $conn->prepare("SELECT * FROM search_history WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-// Update a search history entry
-function updateSearchHistory($history_id, $user_id, $search_query, $timestamp) {
-    global $conn;
-    
-    // statement for updating a search history entry
-    $stmt = $conn->prepare("UPDATE search_history SET user_id = ?, search_query = ?, timestamp = ? WHERE history_id = ?");
-    $stmt->bind_param("issi", $user_id, $search_query, $timestamp, $history_id);
-    
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Delete a search history entry
-function deleteSearchHistory($history_id) {
-    global $conn;
-    
-    // statement for deleting a search history entry
-    $stmt = $conn->prepare("DELETE FROM search_history WHERE history_id = ?");
-    $stmt->bind_param("i", $history_id);
     
     if ($stmt->execute()) {
         return true;
