@@ -1,18 +1,7 @@
 <?php
 session_start();
 include('db_connection.php');
-
-function readNotifications($user_id) {
-    global $conn;
-    
-    // statement for selecting notifications for a specific user
-    $stmt = $conn->prepare("SELECT * FROM notifications WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
+include('db_functions.php'); 
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -52,8 +41,17 @@ $boards_stmt->execute();
 $boards_result = $boards_stmt->get_result();
 $boards = $boards_result->fetch_all(MYSQLI_ASSOC);
 
-// Fetch notifications for the logged-in user
+// Fetch notifications for the logged in user
 $notifications = readNotifications($user_id);
+
+// Fetch messages for the logged in user
+$messages = readMessages($user_id);
+
+// Fetch all users
+$stmt = $conn->prepare("SELECT * FROM users");
+$stmt->execute();
+$result = $stmt->get_result();
+$all_users = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -99,108 +97,136 @@ $notifications = readNotifications($user_id);
             display: block;
             color: #888;
         }
-        .notification-panel, .message-panel {
-            position: fixed;
-            right: 0;
-            top: 0;
-            width: 300px;
-            height: 100%;
-            background: white;
-            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-            display: none;
-            padding: 20px;
-            overflow-y: auto;
+        .navbar .header-icons .nav-link {
+            position: relative;
         }
-        .message-panel h2 {
-            margin-top: 0;
+        .notification-panel, .message-panel, .chat-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .notification-panel h2, .message-panel h2, .chat-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .notification-content, .message-content, .chat-content {
+            padding: 10px;
+        }
+        .all-users-container {
+            margin-top: 20px;
+        }
+        .all-users-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .all-users-container ul li {
+            padding: 5px 0;
         }
     </style>
 </head>
 <body>
-<!-- Header using Bootstrap Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand" href="index.php">
-        <div class="logo-container rounded-circle overflow-hidden">
-            <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
+    <!-- Header using Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="index.php">
+            <div class="logo-container rounded-circle overflow-hidden">
+                <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
+            </div>
+        </a>
+        <div class="ml-auto">
+            <a href="index.php">
+                <h1 class="title">Home Feed</h1>
+            </a>
         </div>
-    </a>
-    <div class="ml-auto">
-        <a href="index.php" class="title">Home Feed</a>
-    </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Create</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Season Collection
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Create</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Season Collection
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Winter</a>
+                        <a class="dropdown-item" href="#">Autumn</a>
+                        <a class="dropdown-item" href="#">Spring</a>
+                        <a class="dropdown-item" href="#">Summer</a>
+                    </div>
+                </li>
+            </ul>
+            <form class="form-inline ml-auto" action="search.php" method="GET">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search users" aria-label="Search" name="query" required>
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+            <div class="header-icons">
+                <a href="search.html" class="nav-link">
+                    <img src="assets/search.png" alt="Search" class="icon">
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Winter</a>
-                    <a class="dropdown-item" href="#">Autumn</a>
-                    <a class="dropdown-item" href="#">Spring</a>
-                    <a class="dropdown-item" href="#">Summer</a>
+                <a href="#" class="nav-link" id="notificationIcon">
+                    <img src="assets/notification.png" alt="Notifications" class="icon">
+                </a>
+                <div id="notificationPanel" class="notification-panel">
+                    <h2>Notifications</h2>
+                    <div class="notification-content">
+                        <?php if (!empty($notifications)): ?>
+                            <ul>
+                                <?php foreach ($notifications as $notification): ?>
+                                    <li>
+                                        <?php echo htmlspecialchars($notification['content']); ?>
+                                        <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php else: ?>
+                            <p>No notifications.</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </li>
-        </ul>
-    </div>
-    <div class="header-icons">
-        <a href="search.html" class="nav-link">
-            <img src="assets/search.png" alt="Search" class="icon">
-        </a>
-        <a href="#" class="nav-link" id="notificationIcon">
-            <img src="assets/notification.png" alt="Notifications" class="icon">
-        </a>
-        <div id="notificationPanel" class="notification-panel">
-            <h2>Notifications</h2>
-            <div class="notification-content">
-                <?php if (!empty($notifications)): ?>
-                    <ul>
-                        <?php foreach ($notifications as $notification): ?>
-                            <li>
-                                <?php echo htmlspecialchars($notification['content']); ?>
-                                <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+                <a href="#" class="nav-link" id="chatIcon">
+                    <img src="assets/messages.png" alt="Chat" class="icon">
+                </a>
+                <div id="chatPanel" class="chat-panel">
+                    <h2>Chat</h2>
+                    <div class="chat-content">
+                        <form id="chatForm">
+                            <input type="hidden" name="receiver_id" value="<?php echo htmlspecialchars($user_id); ?>">
+                            <textarea name="content" placeholder="Your message" required></textarea>
+                            <button type="submit" class="btn btn-primary btn-block">Send</button>
+                        </form>
+                        <ul id="chatMessages">
+                            <!-- Messages will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="account.php" class="nav-link">
+                        <img src="assets/account.png" alt="Account" class="icon">
+                    </a>
+                    <a href="logout.php" class="nav-link">
+                        Logout
+                    </a>
                 <?php else: ?>
-                    <p>No notifications.</p>
+                    <a href="login.php" class="nav-link">
+                        <img src="assets/account.png" alt="Account" class="icon">
+                    </a>
                 <?php endif; ?>
             </div>
         </div>
-        <a href="#" class="nav-link" id="messageIcon">
-            <img src="assets/messages.png" alt="Messages" class="icon">
-        </a>
-        <div id="messagePanel" class="message-panel">
-            <h2>Inbox</h2>
-            <div class="message-content">
-                <input type="text" placeholder="Search by name or email">
-                <button id="newMessageBtn">New Message</button>
-                <form id="newMessageForm" action="send_message.php" method="post" style="display:none;">
-                    <input type="text" name="receiver_id" placeholder="Receiver ID" required>
-                    <textarea name="content" placeholder="Your message" required></textarea>
-                    <button type="submit">Send</button>
-                </form>
-            </div>
-        </div>
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="account.php" class="nav-link">
-                <img src="assets/account.png" alt="Account" class="icon">
-            </a>
-            <a href="logout.php" class="nav-link">
-                Logout
-            </a>
-        <?php else: ?>
-            <a href="login.php" class="nav-link">
-                <img src="assets/account.png" alt="Account" class="icon">
-            </a>
-        <?php endif; ?>
-    </div>
-</nav>
+    </nav>
+
     <div class="profile-container">
         <div class="cover-photo">
             <img src="<?php echo htmlspecialchars($user['cover_photo']); ?>" alt="Cover Photo" id="cover-photo">
@@ -259,7 +285,6 @@ $notifications = readNotifications($user_id);
                 ?>
             </div>
         </div>
-
         <!-- Notifications section -->
         <div class="notifications-container">
             <h2>Notifications</h2>
@@ -276,7 +301,6 @@ $notifications = readNotifications($user_id);
                 <p>No notifications.</p>
             <?php endif; ?>
         </div>
-
     </div>
 
     <!-- Pin posting form -->
@@ -310,47 +334,88 @@ $notifications = readNotifications($user_id);
         document.addEventListener('DOMContentLoaded', function () {
             const notificationIcon = document.getElementById('notificationIcon');
             const notificationPanel = document.getElementById('notificationPanel');
-            const messageIcon = document.getElementById('messageIcon');
-            const messagePanel = document.getElementById('messagePanel');
-            const newMessageBtn = document.getElementById('newMessageBtn');
-            const newMessageForm = document.getElementById('newMessageForm');
+            const chatIcon = document.getElementById('chatIcon');
+            const chatPanel = document.getElementById('chatPanel');
 
             notificationIcon.addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default anchor click behavior
+                event.preventDefault();
                 if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
                     notificationPanel.style.display = 'block';
+                    chatPanel.style.display = 'none';
                 } else {
                     notificationPanel.style.display = 'none';
                 }
             });
 
-            messageIcon.addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default anchor click behavior
-                if (messagePanel.style.display === 'none' || messagePanel.style.display === '') {
-                    messagePanel.style.display = 'block';
+            chatIcon.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (chatPanel.style.display === 'none' || chatPanel.style.display === '') {
+                    chatPanel.style.display = 'block';
+                    notificationPanel.style.display = 'none';
                 } else {
-                    messagePanel.style.display = 'none';
+                    chatPanel.style.display = 'none';
                 }
             });
 
-            newMessageBtn.addEventListener('click', function () {
-                if (newMessageForm.style.display === 'none' || newMessageForm.style.display === '') {
-                    newMessageForm.style.display = 'block';
-                } else {
-                    newMessageForm.style.display = 'none';
-                }
-            });
-
-            // Close the notification and message panels if clicked outside
+            // Close the notification and chat panels if clicked outside
             document.addEventListener('click', function (event) {
                 if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
                     notificationPanel.style.display = 'none';
                 }
-                if (!messageIcon.contains(event.target) && !messagePanel.contains(event.target)) {
-                    messagePanel.style.display = 'none';
+                if (!chatIcon.contains(event.target) && !chatPanel.contains(event.target)) {
+                    chatPanel.style.display = 'none';
                 }
             });
+
+          
+            document.getElementById('chatForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                sendMessage();
+            });
+
+            // Fetch messages 
+            fetchMessages();
+            setInterval(fetchMessages, 5000); 
         });
+
+        function sendMessage() {
+            const form = document.getElementById('chatForm');
+            const formData = new FormData(form);
+
+            fetch('send_message.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchMessages();
+                    form.reset();
+                } else {
+                    alert('Error sending message');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function fetchMessages() {
+            fetch('fetch_messages.php')
+            .then(response => response.json())
+            .then(data => {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = '';
+                data.messages.forEach(message => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>From: </strong>${message.sender_id}<br>${message.content}<br><small>${message.timestamp}</small>`;
+                    chatMessages.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             openTab('created');

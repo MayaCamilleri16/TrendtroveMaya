@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image_url = $target_file;
 
         // Insert pin into database
-        $stmt = $conn->prepare("INSERT INTO pin (user_id, image_url, description, tags, season_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO pins (user_id, image_url, description, tags, season_id) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("isssi", $user_id, $image_url, $description, $tags, $season_id);
 
         if ($stmt->execute()) {
