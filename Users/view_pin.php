@@ -11,14 +11,20 @@ if (!isset($_SESSION['user_id'])) {
 
 // Fetch pin details from the database
 $pin_id = $_GET['pin_id'];
-$pin_stmt = $conn->prepare("SELECT * FROM pins WHERE pin_id = ?");
+$pin_stmt = $conn->prepare("SELECT pins.*, users.name, users.profile_picture FROM pins JOIN users ON pins.user_id = users.users_id WHERE pin_id = ?");
+if ($pin_stmt === false) {
+    die('Prepare failed: ' . htmlspecialchars($conn->error));
+}
 $pin_stmt->bind_param("i", $pin_id);
 $pin_stmt->execute();
 $pin_result = $pin_stmt->get_result();
 $pin = $pin_result->fetch_assoc();
 
 // Fetch comments for the pin
-$comments_stmt = $conn->prepare("SELECT comments.*, users.name FROM comments JOIN users ON comments.user_id = users.users_id WHERE pin_id = ? ORDER BY timestamp DESC");
+$comments_stmt = $conn->prepare("SELECT comments.*, users.name, users.profile_picture FROM comments JOIN users ON comments.user_id = users.users_id WHERE pin_id = ? ORDER BY timestamp DESC");
+if ($comments_stmt === false) {
+    die('Prepare failed: ' . htmlspecialchars($conn->error));
+}
 $comments_stmt->bind_param("i", $pin_id);
 $comments_stmt->execute();
 $comments_result = $comments_stmt->get_result();
@@ -36,7 +42,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error posting comment.";
     }
 }
+
+// Fetch recommended pins (this example fetches 5 random pins, you can adjust the query as needed)
+$recommended_stmt = $conn->prepare("SELECT pins.*, users.name, users.profile_picture FROM pins JOIN users ON pins.user_id = users.users_id WHERE pins.pin_id != ? ORDER BY RAND() LIMIT 5");
+if ($recommended_stmt === false) {
+    die('Prepare failed: ' . htmlspecialchars($conn->error));
+}
+$recommended_stmt->bind_param("i", $pin_id);
+$recommended_stmt->execute();
+$recommended_result = $recommended_stmt->get_result();
+$recommended_pins = $recommended_result->fetch_all(MYSQLI_ASSOC);
+
+// Fetch notifications for the logged in user
+$user_id = $_SESSION['user_id'];
+$notifications = readNotifications($user_id);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,6 +66,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>View Pin</title>
     <link rel="stylesheet" href="style/style.css">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .pin-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .pin-image {
+            flex: 1 1 50%;
+            padding: 10px;
+        }
+        .pin-details {
+            flex: 1 1 50%;
+            padding: 10px;
+        }
+        .pin-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .comments-section {
+            margin-top: 20px;
+        }
+        .comments-section h3 {
+            margin-bottom: 10px;
+        }
+        .comment {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        .comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .comment p {
+            margin: 0;
+        }
+        .comment small {
+            display: block;
+            color: #888;
+        }
+        .recommended-section {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .recommended-pin {
+            flex: 1 1 19%;
+            margin-bottom: 15px;
+        }
+        .recommended-pin img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .profile-picture {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .profile-picture img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
 <!-- Header using Bootstrap Navbar -->
@@ -120,53 +213,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </nav>
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8">
-            <img src="<?php echo htmlspecialchars($pin['image_url']); ?>" alt="" class="img-fluid rounded">
-            <h2><?php echo htmlspecialchars($pin['description']); ?></h2>
-            <p><?php echo htmlspecialchars($pin['tags']); ?></p>
-            <p>Posted by: <?php echo htmlspecialchars($pin['name']); ?></p>
-        </div>
-        <div class="col-md-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3>Comments</h3>
-                <button class="btn btn-danger">Save</button>
+<div class="container mt-4 pin-container">
+    <div class="pin-image">
+        <img src="<?php echo htmlspecialchars($pin['image_url']); ?>" alt="">
+    </div>
+    <div class="pin-details">
+        <h2><?php echo htmlspecialchars($pin['description']); ?></h2>
+        <p><?php echo htmlspecialchars($pin['tags']); ?></p>
+        <div class="d-flex align-items-center mb-3">
+            <div class="profile-picture">
+                <img src="<?php echo htmlspecialchars($pin['profile_picture']); ?>" alt="Profile Picture">
             </div>
-            <div class="comments-section">
-                <?php if (!empty($comments)): ?>
-                    <?php foreach ($comments as $comment): ?>
-                        <div class="comment mb-3">
+            <a href="profile.php?user_id=<?php echo htmlspecialchars($pin['user_id']); ?>"><?php echo htmlspecialchars($pin['name']); ?></a>
+        </div>
+        <button class="btn btn-danger mb-3">Save</button>
+
+        <div class="comments-section">
+            <h3>Comments</h3>
+            <?php if (!empty($comments)): ?>
+                <?php foreach ($comments as $comment): ?>
+                    <div class="comment mb-3">
+                        <div class="profile-picture">
+                            <img src="<?php echo htmlspecialchars($comment['profile_picture']); ?>" alt="Profile Picture">
+                        </div>
+                        <div>
                             <p><strong><?php echo htmlspecialchars($comment['name']); ?>:</strong> <?php echo htmlspecialchars($comment['content']); ?></p>
                             <small><?php echo htmlspecialchars($comment['timestamp']); ?></small>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No comments yet. Be the first to comment!</p>
-                <?php endif; ?>
-                
-                <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">
-                    <div class="form-group">
-                        <textarea name="content" class="form-control" placeholder="Add a comment" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Post</button>
-                </form>
-            </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>No comments yet. Be the first to comment!</p>
+            <?php endif; ?>
+            
+            <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">
+                <div class="form-group">
+                    <textarea name="content" class="form-control" placeholder="Add a comment" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Post</button>
+            </form>
         </div>
     </div>
-
-    <h3 class="mt-5">Recommended Pins</h3>
+</div>
+<!-- Recommended Pins Section -->
+<div class="container mt-4 recommended-section">
+    <h3>Recommended Pins</h3>
     <div class="row">
         <?php foreach ($recommended_pins as $recommended_pin): ?>
-            <div class="col-md-3">
-                <div class="card mb-4">
-                    <a href="view_pin.php?pin_id=<?php echo $recommended_pin['pin_id']; ?>">
-                        <img src="<?php echo htmlspecialchars($recommended_pin['image_url']); ?>" alt="" class="card-img-top">
-                    </a>
-                    <div class="card-body">
-                        <p class="card-text"><?php echo htmlspecialchars($recommended_pin['description']); ?></p>
-                    </div>
-                </div>
+            <div class="col-md-4 recommended-pin">
+                <a href="view_pin.php?pin_id=<?php echo htmlspecialchars($recommended_pin['pin_id']); ?>">
+                    <img src="<?php echo htmlspecialchars($recommended_pin['image_url']); ?>" alt="">
+                </a>
             </div>
         <?php endforeach; ?>
     </div>

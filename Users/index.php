@@ -105,7 +105,7 @@ $notifications = readNotifications($user_id);
         <?php endif; ?>
     </div>
 </nav>
-    <!-- Main area -->
+    <!-- Main -->
     <main id="content">
         <!-- for you -->
         <h2 class="title" style="text-align: center; margin-top: 20px;">For You</h2>
