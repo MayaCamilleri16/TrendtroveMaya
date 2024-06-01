@@ -1,5 +1,23 @@
 <?php
 session_start();
+include('db_connection.php');
+include('db_functions.php'); 
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Fetch pins from the database
+$pins_stmt = $conn->prepare("SELECT * FROM pins");
+$pins_stmt->execute();
+$pins_result = $pins_stmt->get_result();
+$pins = $pins_result->fetch_all(MYSQLI_ASSOC);
+
+// Fetch notifications for the logged in user
+$user_id = $_SESSION['user_id'];
+$notifications = readNotifications($user_id);
 ?>
 
 <!DOCTYPE html>
@@ -95,25 +113,11 @@ session_start();
         <!-- container -->
         <div class="grid-container">
             <?php
-            $cards = [
-                ["image" => "https://i.pinimg.com/736x/9a/1d/4e/9a1d4e46d5bf7855f41690a8cad751fe.jpg", "description" => "Description 1"],
-                ["image" => "https://i.pinimg.com/564x/7e/8b/cb/7e8bcbf8b5a3750440f7bc4735054cc4.jpg", "description" => "Description 2"],
-                ["image" => "https://i.pinimg.com/564x/3c/a3/aa/3ca3aa2bc1c4918e8d5c4aaef566735a.jpg", "description" => "Description 3"],
-                ["image" => "https://i.pinimg.com/736x/88/35/ed/8835ed750c4c23da2409a05cedf64b61.jpg", "description" => "Description 1"],
-                ["image" => "https://i.pinimg.com/564x/14/77/7b/14777b4787ebefeba694c7a9539bd3bf.jpg", "description" => "Description 2"],
-                ["image" => "https://i.pinimg.com/564x/12/88/ba/1288ba7ff3c35080afe90dccf47fe0ac.jpg", "description" => "Description 3"],
-                ["image" => "https://i.pinimg.com/564x/65/6d/a0/656da0cdcc75b64ede64773e8079d50b.jpg", "description" => "Description 1"],
-                ["image" => "https://i.pinimg.com/736x/93/60/3c/93603c4168f40853ecac042d8b224e52.jpg", "description" => "Description 2"],
-                ["image" => "https://i.pinimg.com/736x/47/fe/83/47fe83eeb1b4ac5ca5a64df23188bde7.jpg", "description" => "Description 3"],
-                ["image" => "https://i.pinimg.com/736x/7e/cd/c7/7ecdc7e4abcc1bdfd50661006e3d0831.jpg", "description" => "Description 1"],
-                ["image" => "https://i.pinimg.com/736x/1c/85/70/1c857011b57f556b67bfe37f9b78db1f.jpg", "description" => "Description 2"],
-                ["image" => "https://i.pinimg.com/736x/9e/8e/6c/9e8e6c5f7c126ca0b0d5b49708b63551.jpg", "description" => "Description 3"],
-            ];
-
-            foreach ($cards as $card) {
+            // Display fetched pins
+            foreach ($pins as $pin) {
                 echo "<div class='card'>
-                        <img src='{$card['image']}' alt=''>
-                        <p>{$card['description']}</p>
+                        <img src='{$pin['image_url']}' alt=''>
+                        <p>{$pin['description']}</p>
                       </div>";
             }
             ?>
@@ -125,15 +129,6 @@ session_start();
         <p>&copy; 2024 Trendtrove</p>
     </footer>
     <script>
-        function openTab(tabName) {
-            var i;
-            var x = document.getElementsByClassName("profile-content");
-            for (i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
-            }
-            document.getElementById(tabName).style.display = "block";
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
             const notificationIcon = document.getElementById('notificationIcon');
             const notificationPanel = document.getElementById('notificationPanel');
@@ -153,9 +148,6 @@ session_start();
                     notificationPanel.style.display = 'none';
                 }
             });
-
-            // Initialize the default tab
-            openTab('created');
         });
     </script>
 </body>
