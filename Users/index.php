@@ -116,8 +116,10 @@ $notifications = readNotifications($user_id);
             // Display fetched pins
             foreach ($pins as $pin) {
                 echo "<div class='card'>
-                        <img src='{$pin['image_url']}' alt=''>
-                        <p>{$pin['description']}</p>
+                        <a href='view_pin.php?pin_id={$pin['pin_id']}'>
+                            <img src='{$pin['image_url']}' alt=''>
+                            <p>{$pin['description']}</p>
+                        </a>
                       </div>";
             }
             ?>

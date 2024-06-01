@@ -37,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,9 +46,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="style/style.css">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<body>
 <!-- Header using Bootstrap Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="index.php">
         <div class="logo-container rounded-circle overflow-hidden">
             <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
         </div>
@@ -120,65 +120,79 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </nav>
 
-<body>
-    <div class="pin-container">
-        <img src="<?php echo htmlspecialchars($pin['image_url']); ?>" alt="">
-        <h2><?php echo htmlspecialchars($pin['description']); ?></h2>
-        <p><?php echo htmlspecialchars($pin['tags']); ?></p>
-        <p>Posted by: <?php echo htmlspecialchars($pin['user_id']); ?></p>
-        
-        <div class="comments-section">
-            <h3>Comments</h3>
-            <?php if (!empty($comments)): ?>
-                <?php foreach ($comments as $comment): ?>
-                    <div class="comment">
-                        <p><strong><?php echo htmlspecialchars($comment['name']); ?>:</strong> <?php echo htmlspecialchars($comment['content']); ?></p>
-                        <small><?php echo htmlspecialchars($comment['timestamp']); ?></small>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <img src="<?php echo htmlspecialchars($pin['image_url']); ?>" alt="" class="img-fluid rounded">
+            <h2><?php echo htmlspecialchars($pin['description']); ?></h2>
+            <p><?php echo htmlspecialchars($pin['tags']); ?></p>
+            <p>Posted by: <?php echo htmlspecialchars($pin['name']); ?></p>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Comments</h3>
+                <button class="btn btn-danger">Save</button>
+            </div>
+            <div class="comments-section">
+                <?php if (!empty($comments)): ?>
+                    <?php foreach ($comments as $comment): ?>
+                        <div class="comment mb-3">
+                            <p><strong><?php echo htmlspecialchars($comment['name']); ?>:</strong> <?php echo htmlspecialchars($comment['content']); ?></p>
+                            <small><?php echo htmlspecialchars($comment['timestamp']); ?></small>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No comments yet. Be the first to comment!</p>
+                <?php endif; ?>
+                
+                <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" placeholder="Add a comment" required></textarea>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No comments yet. Be the first to comment!</p>
-            <?php endif; ?>
-            
-            <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">
-                <textarea name="content" placeholder="Add a comment" required></textarea>
-                <button type="submit">Post</button>
-            </form>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </form>
+            </div>
         </div>
     </div>
-      <script>
-        function openTab(tabName) {
-            var i;
-            var x = document.getElementsByClassName("profile-content");
-            for (i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
+
+    <h3 class="mt-5">Recommended Pins</h3>
+    <div class="row">
+        <?php foreach ($recommended_pins as $recommended_pin): ?>
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <a href="view_pin.php?pin_id=<?php echo $recommended_pin['pin_id']; ?>">
+                        <img src="<?php echo htmlspecialchars($recommended_pin['image_url']); ?>" alt="" class="card-img-top">
+                    </a>
+                    <div class="card-body">
+                        <p class="card-text"><?php echo htmlspecialchars($recommended_pin['description']); ?></p>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationPanel = document.getElementById('notificationPanel');
+
+        notificationIcon.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the default anchor click behavior
+            if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
+                notificationPanel.style.display = 'block';
+            } else {
+                notificationPanel.style.display = 'none';
             }
-            document.getElementById(tabName).style.display = "block";
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const notificationIcon = document.getElementById('notificationIcon');
-            const notificationPanel = document.getElementById('notificationPanel');
-
-            notificationIcon.addEventListener('click', function (event) {
-                event.preventDefault(); // Prevent the default anchor click behavior
-                if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
-                    notificationPanel.style.display = 'block';
-                } else {
-                    notificationPanel.style.display = 'none';
-                }
-            });
-
-            // Close the notification panel if clicked outside
-            document.addEventListener('click', function (event) {
-                if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
-                    notificationPanel.style.display = 'none';
-                }
-            });
-
-            // Initialize the default tab
-            openTab('created');
         });
-    </script>
+
+        // Close the notification panel if clicked outside
+        document.addEventListener('click', function (event) {
+            if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
+                notificationPanel.style.display = 'none';
+            }
+        });
+    });
+</script>
 </body>
 </html>
