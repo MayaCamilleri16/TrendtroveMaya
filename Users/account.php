@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('db_connection.php');
-include('db_functions.php'); 
+include('db_functions.php');
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -65,7 +65,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     <style>
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 20px;
             padding: 20px;
         }
@@ -81,6 +81,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
         }
         .card p {
             padding: 10px;
+            font-size: 0.9rem;
         }
         .notifications-container {
             margin-top: 20px;
@@ -132,6 +133,16 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
         .all-users-container ul li {
             padding: 5px 0;
         }
+        .board-container {
+            margin-top: 20px;
+        }
+        .board-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .board-container ul li {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -152,9 +163,6 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Create</a>
-                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Season Collection
@@ -167,14 +175,11 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </li>
             </ul>
-            <form class="form-inline ml-auto" action="search.php" method="GET">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search users" aria-label="Search" name="query" required>
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
-            <div class="header-icons">
-                <a href="search.html" class="nav-link">
-                    <img src="assets/search.png" alt="Search" class="icon">
-                </a>
+            <div class="header-icons ml-auto">
+                <form class="form-inline mr-2" action="search.php" method="GET">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search users" aria-label="Search" name="query" required>
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
                 <a href="#" class="nav-link" id="notificationIcon">
                     <img src="assets/notification.png" alt="Notifications" class="icon">
                 </a>
@@ -273,13 +278,32 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
         <div class="profile-content" id="saved" style="display:none;">
-            <div class="grid-container">
+            <div class="board-container">
                 <?php
                 // Display user's saved boards
                 foreach ($boards as $board) {
                     echo "<div class='card'>
                             <h3>{$board['name']}</h3>
                             <p>{$board['description']}</p>
+                            <ul>";
+                    
+                    // Fetch pins for each board
+                    $board_pins_stmt = $conn->prepare("SELECT pins.* FROM pins JOIN board_pins ON pins.pin_id = board_pins.pin_id WHERE board_pins.board_id = ?");
+                    $board_pins_stmt->bind_param("i", $board['board_id']);
+                    $board_pins_stmt->execute();
+                    $board_pins_result = $board_pins_stmt->get_result();
+                    $board_pins = $board_pins_result->fetch_all(MYSQLI_ASSOC);
+
+                    foreach ($board_pins as $pin) {
+                        echo "<li>
+                                <a href='view_pin.php?pin_id={$pin['pin_id']}'>
+                                    <img src='{$pin['image_url']}' alt=''>
+                                    <p>{$pin['description']}</p>
+                                </a>
+                              </li>";
+                    }
+
+                    echo "    </ul>
                           </div>";
                 }
                 ?>
@@ -367,7 +391,6 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
                 }
             });
 
-          
             document.getElementById('chatForm').addEventListener('submit', function (event) {
                 event.preventDefault();
                 sendMessage();

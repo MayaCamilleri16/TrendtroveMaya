@@ -9,8 +9,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Fetch pins from the database
-$pins_stmt = $conn->prepare("SELECT * FROM pins");
+// Fetch summer pins from the database
+$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE season_id = 4");
 $pins_stmt->execute();
 $pins_result = $pins_stmt->get_result();
 $pins = $pins_result->fetch_all(MYSQLI_ASSOC);
@@ -25,7 +25,7 @@ $notifications = readNotifications($user_id);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trendtrove</title>
+    <title>Trendtrove - Summer Collection</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -88,7 +88,7 @@ $notifications = readNotifications($user_id);
         </div>
     </a>
     <div class="ml-auto">
-        <h1 class="title">Home Feed</h1>
+        <h1 class="title">Summer Collection</h1>
     </div>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -101,7 +101,7 @@ $notifications = readNotifications($user_id);
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="winter.php">Winter</a>
-                    <a class="dropdown-item" href="summer.php">Autumn</a>
+                    <a class="dropdown-item" href="autumn.php">Autumn</a>
                     <a class="dropdown-item" href="spring.php">Spring</a>
                     <a class="dropdown-item" href="summer.php">Summer</a>
                 </div>
@@ -153,13 +153,13 @@ $notifications = readNotifications($user_id);
 
 <!-- Main area -->
 <main id="content">
-    <!-- For you section -->
-    <h2 class="title" style="text-align: center; margin-top: 20px;">For You</h2>
+    <!-- Summer Collection section -->
+    <h2 class="title" style="text-align: center; margin-top: 20px;">Summer Collection</h2>
 
     <!-- Container -->
     <div class="grid-container">
         <?php
-        // Display fetched pins
+        // Display fetched summer pins
         foreach ($pins as $pin) {
             echo "<div class='card'>
                     <a href='view_pin.php?pin_id={$pin['pin_id']}'>
