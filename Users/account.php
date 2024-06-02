@@ -65,9 +65,9 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     <style>
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 10px;
         }
         .card {
             border: 1px solid #ddd;
@@ -80,8 +80,8 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
             height: auto;
         }
         .card p {
-            padding: 10px;
-            font-size: 0.9rem;
+            padding: 5px;
+            font-size: 0.8rem;
         }
         .notifications-container {
             margin-top: 20px;
@@ -141,7 +141,12 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
             padding: 0;
         }
         .board-container ul li {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        .board-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -243,8 +248,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
         </div>
         <div class="profile-photo">
             <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" alt="Profile Photo" id="profile-photo">
-            <form action="upload_profile_photo.php" method="post" enctype="multipart/form-data">
-                <label for="change-profile-photo" class="change-profile-photo-label">Change Profile Photo</label>
+                <label for="change-profile-photo" class="change-profile-photo-label"></label>
                 <input type="file" id="change-profile-photo" name="profile_photo" class="change-profile-photo-input">
                 <button type="submit">Upload</button>
             </form>
@@ -285,7 +289,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
                     echo "<div class='card'>
                             <h3>{$board['name']}</h3>
                             <p>{$board['description']}</p>
-                            <ul>";
+                            <ul class='grid-container'>";
                     
                     // Fetch pins for each board
                     $board_pins_stmt = $conn->prepare("SELECT pins.* FROM pins JOIN board_pins ON pins.pin_id = board_pins.pin_id WHERE board_pins.board_id = ?");
@@ -295,7 +299,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
                     $board_pins = $board_pins_result->fetch_all(MYSQLI_ASSOC);
 
                     foreach ($board_pins as $pin) {
-                        echo "<li>
+                        echo "<li class='card'>
                                 <a href='view_pin.php?pin_id={$pin['pin_id']}'>
                                     <img src='{$pin['image_url']}' alt=''>
                                     <p>{$pin['description']}</p>

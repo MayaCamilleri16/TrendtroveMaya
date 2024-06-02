@@ -293,3 +293,4 @@ $notifications = readNotifications($user_id);
 </script>
 </body>
 </html>
+
