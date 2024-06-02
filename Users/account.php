@@ -151,7 +151,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 <body>
-    <!-- Header using Bootstrap Navbar -->
+    <!-- Header -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <a class="navbar-brand" href="index.php">
             <div class="logo-container rounded-circle overflow-hidden">
@@ -240,18 +240,9 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     <div class="profile-container">
         <div class="cover-photo">
             <img src="<?php echo htmlspecialchars($user['cover_photo']); ?>" alt="Cover Photo" id="cover-photo">
-            <form action="upload_cover_photo.php" method="post" enctype="multipart/form-data">
-                <label for="change-cover-photo" class="change-cover-photo-label">Change Cover Photo</label>
-                <input type="file" id="change-cover-photo" name="cover_photo" class="change-cover-photo-input">
-                <button type="submit">Upload</button>
-            </form>
         </div>
         <div class="profile-photo">
             <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" alt="Profile Photo" id="profile-photo">
-                <label for="change-profile-photo" class="change-profile-photo-label"></label>
-                <input type="file" id="change-profile-photo" name="profile_photo" class="change-profile-photo-input">
-                <button type="submit">Upload</button>
-            </form>
         </div>
         <div class="profile-info">
             <h1><?php echo htmlspecialchars($user['name']); ?></h1>

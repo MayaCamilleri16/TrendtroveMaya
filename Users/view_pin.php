@@ -42,8 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error posting comment.";
     }
 }
-
-// Fetch recommended pins (this example fetches 5 random pins, you can adjust the query as needed)
+//recommended pins
 $recommended_stmt = $conn->prepare("SELECT pins.*, users.name, users.profile_picture FROM pins JOIN users ON pins.user_id = users.users_id WHERE pins.pin_id != ? ORDER BY RAND() LIMIT 5");
 if ($recommended_stmt === false) {
     die('Prepare failed: ' . htmlspecialchars($conn->error));
