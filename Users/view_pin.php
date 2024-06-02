@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('db_connection.php');
-include('db_functions.php'); 
+include('db_functions.php');
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -31,7 +31,7 @@ $comments_result = $comments_stmt->get_result();
 $comments = $comments_result->fetch_all(MYSQLI_ASSOC);
 
 // Handle comment submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['content'])) {
     $comment_content = $_POST['content'];
     $comment_user_id = $_SESSION['user_id'];
     
@@ -42,7 +42,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error posting comment.";
     }
 }
-//recommended pins
+
+// Handle saving pin to board
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['board_id'])) {
+    $board_id = $_POST['board_id'];
+    $user_id = $_SESSION['user_id'];
+
+    if ($board_id == 'new') {
+        $board_name = $_POST['new_board_name'];
+        $board_desc = $_POST['new_board_desc'];
+
+        $stmt = $conn->prepare("INSERT INTO boards (user_id, name, description) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $user_id, $board_name, $board_desc);
+        $stmt->execute();
+        $board_id = $stmt->insert_id;
+    }
+
+    $stmt = $conn->prepare("INSERT INTO board_pins (board_id, pin_id) VALUES (?, ?)");
+    $stmt->bind_param("ii", $board_id, $pin_id);
+    if ($stmt->execute()) {
+        header("Location: view_pin.php?pin_id=" . $pin_id);
+        exit();
+    } else {
+        echo "Error saving pin to board.";
+    }
+}
+
+// Fetch user's boards
+$user_id = $_SESSION['user_id'];
+$boards_stmt = $conn->prepare("SELECT * FROM boards WHERE user_id = ?");
+$boards_stmt->bind_param("i", $user_id);
+$boards_stmt->execute();
+$boards_result = $boards_stmt->get_result();
+$boards = $boards_result->fetch_all(MYSQLI_ASSOC);
+
+// Fetch recommended pins
 $recommended_stmt = $conn->prepare("SELECT pins.*, users.name, users.profile_picture FROM pins JOIN users ON pins.user_id = users.users_id WHERE pins.pin_id != ? ORDER BY RAND() LIMIT 5");
 if ($recommended_stmt === false) {
     die('Prepare failed: ' . htmlspecialchars($conn->error));
@@ -53,7 +87,6 @@ $recommended_result = $recommended_stmt->get_result();
 $recommended_pins = $recommended_result->fetch_all(MYSQLI_ASSOC);
 
 // Fetch notifications for the logged in user
-$user_id = $_SESSION['user_id'];
 $notifications = readNotifications($user_id);
 ?>
 
@@ -225,7 +258,31 @@ $notifications = readNotifications($user_id);
             </div>
             <a href="profile.php?user_id=<?php echo htmlspecialchars($pin['user_id']); ?>"><?php echo htmlspecialchars($pin['name']); ?></a>
         </div>
-        <button class="btn btn-danger mb-3">Save</button>
+
+        <!-- Save to Board Form -->
+        <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">
+            <div class="form-group">
+                <label for="board_id">Save to Board:</label>
+                <select name="board_id" class="form-control" required>
+                    <option value="">Select a board</option>
+                    <?php foreach ($boards as $board): ?>
+                        <option value="<?php echo $board['board_id']; ?>"><?php echo htmlspecialchars($board['name']); ?></option>
+                    <?php endforeach; ?>
+                    <option value="new">Create new board</option>
+                </select>
+            </div>
+            <div id="new-board-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="new_board_name">New Board Name:</label>
+                    <input type="text" name="new_board_name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="new_board_desc">New Board Description:</label>
+                    <input type="text" name="new_board_desc" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-danger mb-3">Save</button>
+        </form>
 
         <div class="comments-section">
             <h3>Comments</h3>
@@ -272,9 +329,11 @@ $notifications = readNotifications($user_id);
     document.addEventListener('DOMContentLoaded', function () {
         const notificationIcon = document.getElementById('notificationIcon');
         const notificationPanel = document.getElementById('notificationPanel');
+        const boardSelect = document.querySelector('select[name="board_id"]');
+        const newBoardFields = document.getElementById('new-board-fields');
 
         notificationIcon.addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent the default anchor click behavior
+            event.preventDefault();
             if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
                 notificationPanel.style.display = 'block';
             } else {
@@ -282,14 +341,20 @@ $notifications = readNotifications($user_id);
             }
         });
 
-        // Close the notification panel if clicked outside
         document.addEventListener('click', function (event) {
             if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
                 notificationPanel.style.display = 'none';
+            }
+        });
+
+        boardSelect.addEventListener('change', function () {
+            if (this.value === 'new') {
+                newBoardFields.style.display = 'block';
+            } else {
+                newBoardFields.style.display = 'none';
             }
         });
     });
 </script>
 </body>
 </html>
-
