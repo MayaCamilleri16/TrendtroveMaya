@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Fetch spring pins from the database
-$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE season_id = 3");
+$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE season_id = 1"); 
 $pins_stmt->execute();
 $pins_result = $pins_stmt->get_result();
 $pins = $pins_result->fetch_all(MYSQLI_ASSOC);
@@ -30,8 +30,6 @@ $notifications = readNotifications($user_id);
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    <!-- Masonry library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
     <style>
         .grid-container {
             display: grid;
@@ -153,13 +151,13 @@ $notifications = readNotifications($user_id);
 
 <!-- Main area -->
 <main id="content">
-    <!-- Spring section -->
+    <!-- Spring Collection section -->
     <h2 class="title" style="text-align: center; margin-top: 20px;">Spring Collection</h2>
 
     <!-- Container -->
     <div class="grid-container">
         <?php
-        //spring pins
+        // Display fetched spring pins
         foreach ($pins as $pin) {
             echo "<div class='card'>
                     <a href='view_pin.php?pin_id={$pin['pin_id']}'>

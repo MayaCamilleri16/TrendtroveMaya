@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Fetch summer pins from the database
-$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE season_id = 4");
+$pins_stmt = $conn->prepare("SELECT * FROM pins WHERE season_id = 2"); 
 $pins_stmt->execute();
 $pins_result = $pins_stmt->get_result();
 $pins = $pins_result->fetch_all(MYSQLI_ASSOC);
@@ -30,8 +30,6 @@ $notifications = readNotifications($user_id);
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="style/style.css">
-    <!-- Masonry library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
     <style>
         .grid-container {
             display: grid;
@@ -151,9 +149,9 @@ $notifications = readNotifications($user_id);
     </div>
 </nav>
 
-<!-- Main area -->
+
 <main id="content">
-    <!-- Summer Collection section -->
+    <!-- Summer Collection -->
     <h2 class="title" style="text-align: center; margin-top: 20px;">Summer Collection</h2>
 
     <!-- Container -->
@@ -186,7 +184,7 @@ $notifications = readNotifications($user_id);
         const notificationPanel = document.getElementById('notificationPanel');
 
         notificationIcon.addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent the default anchor click behavior
+            event.preventDefault(); /
             if (notificationPanel.style.display === 'none' || notificationPanel.style.display === '') {
                 notificationPanel.style.display = 'block';
             } else {
