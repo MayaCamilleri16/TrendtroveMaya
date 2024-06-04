@@ -77,11 +77,66 @@ $notifications = readNotifications($user_id);
         .notification-content {
             padding: 10px;
         }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+        .card p {
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+        .notifications-container {
+            margin-top: 20px;
+        }
+        .notifications-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .notifications-container ul li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .notifications-container ul li small {
+            display: block;
+            color: #888;
+        }
+        .navbar .header-icons .nav-link {
+            position: relative;
+        }
+        .notification-panel, .message-panel, .chat-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .notification-panel h2, .message-panel h2, .chat-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .notification-content, .message-content, .chat-content {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light">
+   <!-- Navbar -->
+   <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="index.php">
         <div class="logo-container rounded-circle overflow-hidden">
             <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
@@ -133,23 +188,38 @@ $notifications = readNotifications($user_id);
                 <?php endif; ?>
             </div>
         </div>
-        <a href="messages.html" class="nav-link">
-            <img src="assets/messages.png" alt="Messages" class="icon">
-        </a>
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <a href="account.php" class="nav-link">
-                <img src="assets/account.png" alt="Account" class="icon">
-            </a>
-            <a href="logout.php" class="nav-link">
-                Logout
-            </a>
-        <?php else: ?>
-            <a href="login.php" class="nav-link">
-                <img src="assets/account.png" alt="Account" class="icon">
-            </a>
-        <?php endif; ?>
-    </div>
-</nav>
+                
+                <a href="#" class="nav-link" id="chatIcon">
+                    <img src="assets/messages.png" alt="Chat" class="icon">
+                </a>
+                <div id="chatPanel" class="chat-panel">
+                    <h2>Chat</h2>
+                    <div class="chat-content">
+                        <form id="chatForm">
+                            <input type="hidden" name="receiver_id" value="<?php echo htmlspecialchars($user_id); ?>">
+                            <textarea name="content" placeholder="Your message" required></textarea>
+                            <button type="submit" class="btn btn-primary btn-block">Send</button>
+                        </form>
+                        <ul id="chatMessages">
+                            <!-- Messages will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="account.php" class="nav-link">
+                        <img src="assets/account.png" alt="Account" class="icon">
+                    </a>
+                    <a href="logout.php" class="nav-link">
+                        Logout
+                    </a>
+                <?php else: ?>
+                    <a href="login.php" class="nav-link">
+                        <img src="assets/account.png" alt="Account" class="icon">
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
 
 <!-- Main area -->
 <main id="content">
@@ -200,6 +270,78 @@ $notifications = readNotifications($user_id);
                 notificationPanel.style.display = 'none';
             }
         });
+        chatIcon.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (chatPanel.style.display === 'none' || chatPanel.style.display === '') {
+                    chatPanel.style.display = 'block';
+                    notificationPanel.style.display = 'none';
+                } else {
+                    chatPanel.style.display = 'none';
+                }
+            });
+
+            // Close the notification and chat panels if clicked outside
+            document.addEventListener('click', function (event) {
+                if (!notificationIcon.contains(event.target) && !notificationPanel.contains(event.target)) {
+                    notificationPanel.style.display = 'none';
+                }
+                if (!chatIcon.contains(event.target) && !chatPanel.contains(event.target)) {
+                    chatPanel.style.display = 'none';
+                }
+            });
+
+            document.getElementById('chatForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                sendMessage();
+            });
+
+            // Fetch messages 
+            fetchMessages();
+            setInterval(fetchMessages, 5000); 
+        });
+
+        function sendMessage() {
+            const form = document.getElementById('chatForm');
+            const formData = new FormData(form);
+
+            fetch('send_message.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchMessages();
+                    form.reset();
+                } else {
+                    alert('Error sending message');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function fetchMessages() {
+            fetch('fetch_messages.php')
+            .then(response => response.json())
+            .then(data => {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = '';
+                data.messages.forEach(message => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>From: </strong>${message.sender_id}<br>${message.content}<br><small>${message.timestamp}</small>`;
+                    chatMessages.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            openTab('created');
+    
     });
 </script>
 </body>

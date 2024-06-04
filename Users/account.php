@@ -151,60 +151,60 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <a class="navbar-brand" href="index.php">
-            <div class="logo-container rounded-circle overflow-hidden">
-                <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
-            </div>
-        </a>
-        <div class="ml-auto">
-            <a href="index.php">
-                <h1 class="title">Home Feed</h1>
-            </a>
+   <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="index.php">
+        <div class="logo-container rounded-circle overflow-hidden">
+            <img src="assets/logo.png" alt="Trendtrove Logo" class="img-fluid">
         </div>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Season Collection
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Winter</a>
-                        <a class="dropdown-item" href="#">Autumn</a>
-                        <a class="dropdown-item" href="#">Spring</a>
-                        <a class="dropdown-item" href="#">Summer</a>
-                    </div>
-                </li>
-            </ul>
-            <div class="header-icons ml-auto">
-                <form class="form-inline mr-2" action="search.php" method="GET">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search users" aria-label="Search" name="query" required>
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                </form>
-                <a href="#" class="nav-link" id="notificationIcon">
-                    <img src="assets/notification.png" alt="Notifications" class="icon">
+    </a>
+    <div class="ml-auto">
+        <h1 class="title">Home Feed</h1>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Season Collection
                 </a>
-                <div id="notificationPanel" class="notification-panel">
-                    <h2>Notifications</h2>
-                    <div class="notification-content">
-                        <?php if (!empty($notifications)): ?>
-                            <ul>
-                                <?php foreach ($notifications as $notification): ?>
-                                    <li>
-                                        <?php echo htmlspecialchars($notification['content']); ?>
-                                        <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php else: ?>
-                            <p>No notifications.</p>
-                        <?php endif; ?>
-                    </div>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="winter.php">Winter</a>
+                    <a class="dropdown-item" href="summer.php">Autumn</a>
+                    <a class="dropdown-item" href="spring.php">Spring</a>
+                    <a class="dropdown-item" href="summer.php">Summer</a>
                 </div>
+            </li>
+        </ul>
+    </div>
+    <div class="header-icons">
+        <form class="form-inline mr-2" action="search.php" method="GET">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search users" aria-label="Search" name="query" required>
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+        <a href="#" class="nav-link" id="notificationIcon">
+            <img src="assets/notification.png" alt="Notifications" class="icon">
+        </a>
+        <div id="notificationPanel" class="notification-panel">
+            <h2>Notifications</h2>
+            <div class="notification-content">
+                <?php if (!empty($notifications)): ?>
+                    <ul>
+                        <?php foreach ($notifications as $notification): ?>
+                            <li>
+                                <?php echo htmlspecialchars($notification['content']); ?>
+                                <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No notifications.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+                
                 <a href="#" class="nav-link" id="chatIcon">
                     <img src="assets/messages.png" alt="Chat" class="icon">
                 </a>
@@ -304,23 +304,6 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
                 ?>
             </div>
         </div>
-        <!-- Notifications section -->
-        <div class="notifications-container">
-            <h2>Notifications</h2>
-            <?php if (!empty($notifications)): ?>
-                <ul>
-                    <?php foreach ($notifications as $notification): ?>
-                        <li>
-                            <?php echo htmlspecialchars($notification['content']); ?>
-                            <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p>No notifications.</p>
-            <?php endif; ?>
-        </div>
-    </div>
 
     <!-- Pin posting form -->
     <div class="pin-posting-form">
