@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('db_connection.php');
-include('db_functions.php'); 
+include('db_functions.php');
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -46,6 +46,17 @@ $stmt = $conn->prepare("SELECT COUNT(*) as count FROM followers WHERE follower_u
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $following_count = $stmt->get_result()->fetch_assoc()['count'];
+
+// Fetch messages for the logged in user
+$messages_stmt = $conn->prepare("SELECT m.*, u1.name as sender_name, u2.name as receiver_name FROM messages m 
+                                JOIN users u1 ON m.sender_id = u1.users_id 
+                                JOIN users u2 ON m.receiver_id = u2.users_id 
+                                WHERE m.sender_id = ? OR m.receiver_id = ? 
+                                ORDER BY m.timestamp DESC");
+$messages_stmt->bind_param("ii", $current_user_id, $current_user_id);
+$messages_stmt->execute();
+$messages_result = $messages_stmt->get_result();
+$messages = $messages_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -74,7 +85,6 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
             height: 150px;
             object-fit: cover;
             margin-top: -8px;
-
         }
         .profile-info {
             text-align: center;
@@ -144,6 +154,81 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
         .suggestions ul li:hover {
             background-color: #f5f5f5;
         }
+        .inbox-panel {
+            position: fixed;
+            right: 0;
+            top: 60px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: white;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+        .inbox-panel.active {
+            display: block;
+        }
+        .inbox-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .inbox-content {
+            padding: 10px;
+        }
+        .inbox-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .inbox-content ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .inbox-content ul li:last-child {
+            border-bottom: none;
+        }
+        .inbox-content ul li:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .inbox-content .message-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .inbox-content .message-form input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .inbox-content .message-form button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chat-messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-messages li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .chat-messages li small {
+            display: block;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -206,17 +291,27 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
         <a href="#" class="nav-link" id="chatIcon">
             <img src="assets/messages.png" alt="Chat" class="icon">
         </a>
-        <div id="chatPanel" class="chat-panel">
-            <h2>Chat</h2>
-            <div class="chat-content">
-                <form id="chatForm">
-                    <input type="hidden" name="receiver_id" value="<?php echo htmlspecialchars($current_user_id); ?>">
-                    <textarea name="content" placeholder="Your message" required></textarea>
-                    <button type="submit" class="btn btn-primary btn-block">Send</button>
-                </form>
-                <ul id="chatMessages">
-                    <!-- Messages will be loaded here -->
+        <div id="chatPanel" class="inbox-panel">
+            <h2>Inbox</h2>
+            <div class="inbox-content">
+                <ul id="messageList">
+                    <?php foreach ($messages as $message): ?>
+                        <li onclick="openChat(<?php echo $message['sender_id'] === $current_user_id ? $message['receiver_id'] : $message['sender_id']; ?>)">
+                            <strong><?php echo htmlspecialchars($message['sender_id'] === $current_user_id ? $message['receiver_name'] : $message['sender_name']); ?>:</strong>
+                            <br><?php echo htmlspecialchars($message['content']); ?>
+                            <br><small><?php echo htmlspecialchars($message['timestamp']); ?></small>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
+                <div id="chatContainer" style="display: none;">
+                    <h3 id="chatUserName"></h3>
+                    <ul id="chatMessages" class="chat-messages"></ul>
+                    <form id="chatForm" class="message-form">
+                        <input type="hidden" name="receiver_id" id="chatReceiverId">
+                        <input type="text" name="content" placeholder="Your message" required>
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
             </div>
         </div>
         <?php if (isset($_SESSION['user_id'])): ?>
@@ -330,9 +425,14 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
             }
         });
 
-        document.getElementById('chatForm').addEventListener('submit', function (event) {
+        document.getElementById('messageForm').addEventListener('submit', function (event) {
             event.preventDefault();
             sendMessage();
+        });
+
+        document.getElementById('chatForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            sendChatMessage();
         });
 
         // Fetch messages 
@@ -340,8 +440,16 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
         setInterval(fetchMessages, 5000);
     });
 
+    function openChat(userId) {
+        document.getElementById('chatContainer').style.display = 'block';
+        document.getElementById('chatReceiverId').value = userId;
+        const userName = document.querySelector(`#messageList li[onclick="openChat(${userId})"] strong`).innerText;
+        document.getElementById('chatUserName').innerText = userName;
+        fetchChatMessages(userId);
+    }
+
     function sendMessage() {
-        const form = document.getElementById('chatForm');
+        const form = document.getElementById('messageForm');
         const formData = new FormData(form);
 
         fetch('send_message.php', {
@@ -362,15 +470,55 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
         });
     }
 
+    function sendChatMessage() {
+        const form = document.getElementById('chatForm');
+        const formData = new FormData(form);
+
+        fetch('send_message.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fetchChatMessages(document.getElementById('chatReceiverId').value);
+                form.reset();
+            } else {
+                alert('Error sending message');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
     function fetchMessages() {
         fetch('fetch_messages.php')
+        .then(response => response.json())
+        .then(data => {
+            const messageList = document.getElementById('messageList');
+            messageList.innerHTML = '';
+            data.messages.forEach(message => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${message.sender_id === <?php echo $current_user_id; ?> ? message.receiver_name : message.sender_name}:</strong><br>${message.content}<br><small>${message.timestamp}</small>`;
+                li.setAttribute('onclick', `openChat(${message.sender_id === <?php echo $current_user_id; ?> ? message.receiver_id : message.sender_id})`);
+                messageList.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    function fetchChatMessages(userId) {
+        fetch('fetch_chat_messages.php?user_id=' + userId)
         .then(response => response.json())
         .then(data => {
             const chatMessages = document.getElementById('chatMessages');
             chatMessages.innerHTML = '';
             data.messages.forEach(message => {
                 const li = document.createElement('li');
-                li.innerHTML = `<strong>From: </strong>${message.sender_id}<br>${message.content}<br><small>${message.timestamp}</small>`;
+                li.innerHTML = `<strong>${message.sender_id === <?php echo $current_user_id; ?> ? 'You' : message.sender_name}:</strong><br>${message.content}<br><small>${message.timestamp}</small>`;
                 chatMessages.appendChild(li);
             });
         })
@@ -385,4 +533,3 @@ $following_count = $stmt->get_result()->fetch_assoc()['count'];
 </script>
 </body>
 </html>
-

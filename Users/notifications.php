@@ -31,7 +31,7 @@ $notifications = readNotifications($user_id);
             <ul>
                 <?php foreach ($notifications as $notification): ?>
                     <li>
-                        <?php echo htmlspecialchars($notification['content']); ?>
+                        <?php echo htmlspecialchars($notification['user_name']); ?>: <?php echo htmlspecialchars($notification['content']); ?>
                         <small><?php echo htmlspecialchars($notification['timestamp']); ?></small>
                     </li>
                 <?php endforeach; ?>

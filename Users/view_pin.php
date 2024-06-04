@@ -88,6 +88,12 @@ $recommended_pins = $recommended_result->fetch_all(MYSQLI_ASSOC);
 
 // Fetch notifications for the logged in user
 $notifications = readNotifications($user_id);
+
+// Fetch pin views count
+$stmt = $conn->prepare("SELECT COUNT(*) as count FROM analytics WHERE interaction_type = 'view' AND associated_id = ?");
+$stmt->bind_param("i", $pin_id);
+$stmt->execute();
+$pin_views_count = $stmt->get_result()->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>
@@ -258,6 +264,7 @@ $notifications = readNotifications($user_id);
             </div>
             <a href="profile.php?user_id=<?php echo htmlspecialchars($pin['user_id']); ?>"><?php echo htmlspecialchars($pin['name']); ?></a>
         </div>
+        <p><?php echo $pin_views_count . ' views'; ?></p> <!-- Pin views displayed here -->
 
         <!-- Save to Board Form -->
         <form action="view_pin.php?pin_id=<?php echo $pin_id; ?>" method="post">

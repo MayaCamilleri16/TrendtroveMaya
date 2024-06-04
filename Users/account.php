@@ -8,8 +8,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Fetch user details from the database
 $user_id = $_SESSION['user_id'];
+
+// Log profile view
+$stmt = $conn->prepare("INSERT INTO analytics (user_id, interaction_type, timestamp, associated_id) VALUES (?, 'view', NOW(), ?)");
+$stmt->bind_param("ii", $user_id, $user_id);
+$stmt->execute();
+
+// Fetch user details from the database
 $stmt = $conn->prepare("SELECT * FROM users WHERE users_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -52,6 +58,12 @@ $stmt = $conn->prepare("SELECT * FROM users");
 $stmt->execute();
 $result = $stmt->get_result();
 $all_users = $result->fetch_all(MYSQLI_ASSOC);
+
+// Fetch profile views count
+$stmt = $conn->prepare("SELECT COUNT(*) as count FROM analytics WHERE interaction_type = 'view' AND associated_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$profile_views_count = $stmt->get_result()->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>
@@ -248,6 +260,7 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
             <h1><?php echo htmlspecialchars($user['name']); ?></h1>
             <p><?php echo htmlspecialchars($user['bio']); ?></p>
             <p><?php echo $followers_count . ' followers · ' . $following_count . ' following'; ?></p>
+            <p><?php echo $profile_views_count . ' profile views'; ?></p> <!-- Profile views displayed here -->
         </div>
         <div class="profile-actions">
             <a href="editprofile.php" class="btn btn-edit-profile">Edit Profile</a>
@@ -424,3 +437,4 @@ $all_users = $result->fetch_all(MYSQLI_ASSOC);
     </script>
 </body>
 </html>
+

@@ -177,30 +177,42 @@ function deleteSeasonCollection($collection_id) {
     return $stmt->execute();
 }
 
+
 // notifications
 function createNotification($user_id, $type, $content, $read) {
     global $conn;
     $timestamp = date('Y-m-d H:i:s');
 
+    // Fetch the user name
+    $user_stmt = $conn->prepare("SELECT name FROM users WHERE users_id = ?");
+    $user_stmt->bind_param("i", $user_id);
+    $user_stmt->execute();
+    $user_result = $user_stmt->get_result();
+    $user = $user_result->fetch_assoc();
+    $user_name = $user['name'];
+
+    // Append the user name to the content
+    $notification_content = str_replace('user ID ' . $user_id, $user_name, $content);
+
     $stmt = $conn->prepare("INSERT INTO notifications (user_id, type, content, timestamp, `read`) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt === false) {
-        die('Error preparing the statement: ' . htmlspecialchars($conn->error));
-    }
-    $stmt->bind_param("isssi", $user_id, $type, $content, $timestamp, $read);
+    $stmt->bind_param("isssi", $user_id, $type, $notification_content, $timestamp, $read);
 
     return $stmt->execute();
 }
 
+
 function readNotifications($user_id) {
     global $conn;
 
-    $stmt = $conn->prepare("SELECT * FROM notifications WHERE user_id = ?");
+    $stmt = $conn->prepare("SELECT n.*, u.name as user_name FROM notifications n JOIN users u ON n.user_id = u.users_id WHERE n.user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     return $result->fetch_all(MYSQLI_ASSOC);
 }
+
+
 
 function updateNotification($notification_id, $read) {
     global $conn;
