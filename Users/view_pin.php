@@ -115,7 +115,175 @@ $messages = $messages_result->fetch_all(MYSQLI_ASSOC);
     <title>View Pin</title>
     <link rel="stylesheet" href="style/style.css">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
+    <style>
+        .pin-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .pin-image {
+            flex: 1 1 50%;
+            padding: 10px;
+        }
+        .pin-details {
+            flex: 1 1 50%;
+            padding: 10px;
+        }
+        .pin-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .comments-section {
+            margin-top: 20px;
+        }
+        .comments-section h3 {
+            margin-bottom: 10px;
+        }
+        .comment {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        .comment img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        .comment p {
+            margin: 0;
+        }
+        .comment small {
+            display: block;
+            color: #888;
+        }
+        .recommended-section {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .recommended-pin {
+            flex: 1 1 19%;
+            margin-bottom: 15px;
+        }
+        .recommended-pin img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .profile-picture {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .profile-picture img {
+            width: 100%;
+            height: auto;
+        }
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 300px;
+            display: none;
+        }
+        .suggestions ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .suggestions ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestions ul li:hover {
+            background-color: #f5f5f5;
+        }
+        .inbox-panel {
+            position: fixed;
+            right: 0;
+            top: 60px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: white;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+        .inbox-panel.active {
+            display: block;
+        }
+        .inbox-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .inbox-content {
+            padding: 10px;
+        }
+        .inbox-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .inbox-content ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .inbox-content ul li:last-child {
+            border-bottom: none;
+        }
+        .inbox-content ul li:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .inbox-content .message-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .inbox-content .message-form input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .inbox-content .message-form button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chat-messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-messages li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .chat-messages li small {
+            display: block;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -135,9 +303,6 @@ $messages = $messages_result->fetch_all(MYSQLI_ASSOC);
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Create</a>
-            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Season Collection

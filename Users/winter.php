@@ -41,7 +41,65 @@ $messages = $messages_result->fetch_all(MYSQLI_ASSOC);
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="style/style.css">
-
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+        .card p {
+            padding: 10px;
+        }
+        .navbar .header-icons .nav-link {
+            position: relative;
+        }
+        .notification-panel, .inbox-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .notification-panel h2, .inbox-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .notification-content, .inbox-content {
+            padding: 10px;
+        }
+        .inbox-panel ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .inbox-panel ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .inbox-panel ul li:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -61,6 +119,9 @@ $messages = $messages_result->fetch_all(MYSQLI_ASSOC);
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Create</a>
+            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Season Collection

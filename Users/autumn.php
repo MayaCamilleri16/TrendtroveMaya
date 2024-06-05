@@ -41,7 +41,149 @@ $messages = $messages_result->fetch_all(MYSQLI_ASSOC);
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="style/style.css">
- 
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+        .card p {
+            padding: 10px;
+        }
+        .navbar .header-icons .nav-link {
+            position: relative;
+        }
+        .notification-panel, .chat-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .notification-panel h2, .chat-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .notification-content, .chat-content {
+            padding: 10px;
+        }
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 300px;
+            display: none;
+        }
+        .suggestions ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .suggestions ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .suggestions ul li:hover {
+            background-color: #f5f5f5;
+        }
+        .inbox-panel {
+            position: fixed;
+            right: 0;
+            top: 60px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: white;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+        .inbox-panel.active {
+            display: block;
+        }
+        .inbox-panel h2 {
+            padding: 10px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        }
+        .inbox-content {
+            padding: 10px;
+        }
+        .inbox-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .inbox-content ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .inbox-content ul li:last-child {
+            border-bottom: none;
+        }
+        .inbox-content ul li:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .inbox-content .message-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .inbox-content .message-form input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .inbox-content .message-form button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chat-messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chat-messages li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .chat-messages li small {
+            display: block;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->
