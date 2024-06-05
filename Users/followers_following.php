@@ -6,34 +6,7 @@
     <title>Followers & Following</title>
     <link rel="stylesheet" href="style/style.css">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .modal-content {
-            padding: 20px;
-        }
-        .user-list {
-            list-style: none;
-            padding: 0;
-        }
-        .user-list li {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .user-list img {
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            margin-right: 10px;
-        }
-        .user-list .user-info {
-            flex-grow: 1;
-        }
-        .modal-header, .modal-body, .modal-footer {
-            padding: 1rem;
-        }
-    </style>
+
 </head>
 <body>
 <div class="container">

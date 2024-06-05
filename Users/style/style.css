@@ -1,257 +1,221 @@
-
-/* index Styles */
-
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #f9f9f9;
 }
 
+/* Navbar Styles */
 .navbar {
-    background-color: #fff; 
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 20px;
 }
 
-.navbar-brand img {
-    width: 50px; 
-    height: 50px;
+.navbar-brand .logo-container {
+    width: 40px;
+    height: 40px;
 }
 
-.navbar-brand {
+.navbar .header-icons .nav-link {
+    position: relative;
+}
+
+.navbar .header-icons .nav-link img.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.navbar .form-inline .form-control {
+    width: 200px;
+}
+
+.navbar .suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    width: 300px;
+    display: none;
+}
+
+.navbar .suggestions ul {
+    list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
-.navbar-nav .nav-link {
-    color: #333; 
+.navbar .suggestions ul li {
+    padding: 10px;
+    cursor: pointer;
 }
 
-.navbar-nav .nav-link:hover {
-    color: #555; 
+.navbar .suggestions ul li:hover {
+    background-color: #f5f5f5;
 }
 
-.navbar .title {
-    font-size: 15px; 
+.notification-panel, .message-panel, .chat-panel, .inbox-panel {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }
 
-.header-icons {
-    margin-left: auto;
+.inbox-panel.active {
+    display: block;
 }
 
-.header-icons .icon {
-    width: 25px; 
-    height: auto;
-    margin-right: 10px;
+.notification-panel h2, .message-panel h2, .chat-panel h2 {
+    padding: 10px;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
 }
-.header-icons {
+
+.notification-content, .message-content, .chat-content, .inbox-content {
+    padding: 10px;
+}
+
+.inbox-content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.inbox-content ul li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.inbox-content ul li:last-child {
+    border-bottom: none;
+}
+
+.inbox-content ul li:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.inbox-content .message-form {
     display: flex;
+    margin-top: 10px;
 }
 
-.header-icons .nav-link {
-    margin-right: -20px; 
+.inbox-content .message-form input[type="text"] {
+    flex-grow: 1;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-
-.title {
-    color: #333; 
+.inbox-content .message-form button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
+.chat-messages {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.chat-messages li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.chat-messages li small {
+    display: block;
+    color: #888;
+}
+
+/* Grid Container Styles */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    grid-gap: 10px;
-    padding: 70px;
-    border: none;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .card img {
     width: 100%;
     height: auto;
-    border: none;
-    border-radius: 20px; 
-
-
-/* Footer Styles */
-
-footer {
-    background-color: #f8f9fa; 
-    padding: 20px 0;
 }
 
-footer p {
-    margin: 0;
-    color: #777; 
-}
-}
-
-/* login Styles */
-
-body {
-    font-family: Arial, sans-serif;
-
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.signup, .login {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-button {
-    margin-bottom: 15px;
+.card p {
     padding: 10px;
-
-    border-radius: 4px;
 }
 
-button {
-    background-color: #bd081c;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #d11141;
-}
-
-
-/* account Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
+/* Profile Page Styles */
 .profile-container {
-    width: 80%;
-    margin: auto;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
 }
 
 .cover-photo {
     position: relative;
     width: 100%;
     height: 200px;
-    overflow: hidden;
-    background-color: #eee;
-}
-
-.cover-photo img {
-    width: 100%;
-    height: auto;
-}
-
-.change-cover-photo-label {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.change-cover-photo-input {
-    display: none;
-}
-
-.profile-photo {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    margin: -75px auto 10px;
-    border: 5px solid #fff;
-    border-radius: 50%;
-    overflow: hidden;
-    background-color: #eee;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 20px;
 }
 
 .profile-photo img {
-    width: 100%;
-    height: auto;
-}
-
-.change-profile-photo-label {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.change-profile-photo-input {
-    display: none;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-top: -8px;
 }
 
 .profile-info {
     text-align: center;
-    margin-bottom: 20px;
 }
 
 .profile-actions {
     text-align: center;
-    margin-bottom: 20px;
-}
-
-.btn {
-    display: inline-block;
-    margin: 0 10px;
-    padding: 10px 20px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.btn-logout {
-    background-color: #dc3545;
+    margin-top: 20px;
 }
 
 .profile-tabs {
     text-align: center;
-    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
-.tab-btn {
-    padding: 10px 20px;
+.profile-tabs .tab-btn {
+    background: none;
     border: none;
-    background-color: #f0f0f0;
+    padding: 10px 20px;
     cursor: pointer;
+    font-weight: bold;
 }
 
-.tab-btn.active {
-    background-color: #007bff;
-    color: #fff;
+.profile-tabs .tab-btn.active {
+    color: #007bff;
 }
 
 .profile-content {
@@ -262,33 +226,96 @@ body {
     display: block;
 }
 
-/* notification Styles */
-
-.notification-panel {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    right: 0; /* Align to the right side */
-    top: 60px; /* Adjust based on your navbar height */
-    width: 300px; /* Adjust as needed */
-    background-color: white; /* Background color */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for the panel */
-    z-index: 1000; /* Ensure it is on top */
-    border-left: 1px solid #ddd; /* Border for better separation */
-    padding: 15px; /* Padding inside the panel */
-    overflow-y: auto; /* Scrollable if content exceeds height */
+/* Board Container Styles */
+.board-container {
+    margin-top: 20px;
 }
 
-.notification-content ul {
-    list-style-type: none; /* Remove default bullet points */
-    padding: 0; /* Remove default padding */
+.board-container ul {
+    list-style-type: none;
+    padding: 0;
 }
 
-.notification-content ul li {
-    border-bottom: 1px solid #ddd; /* Separator between notifications */
-    padding: 10px 0; /* Space between notifications */
+.board-container ul li {
+    margin-bottom: 10px;
 }
 
-.notification-content ul li small {
-    display: block; /* Separate line for timestamp */
-    color: #888; /* Gray color for timestamp */
+.board-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
 }
+
+/* Pin Posting Form Styles */
+.pin-posting-form {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.pin-posting-form h2 {
+    margin-bottom: 20px;
+}
+
+.pin-posting-form input, .pin-posting-form select, .pin-posting-form button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.pin-posting-form input[type="file"] {
+    padding: 5px;
+}
+
+.pin-posting-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #fff;
+    padding: 20px 0;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    margin-top: 20px;
+}
+
+footer p {
+    margin: 0;
+}
+
+
+.modal-content {
+    padding: 20px;
+}
+.user-list {
+    list-style: none;
+    padding: 0;
+}
+.user-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.user-list img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+.user-list .user-info {
+    flex-grow: 1;
+}
+.modal-header, .modal-body, .modal-footer {
+    padding: 1rem;
+}
+
